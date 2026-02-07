@@ -405,6 +405,33 @@ export class MongoStorage implements IStorage {
   async getUnreadNotificationCount(userId: string): Promise<number> {
     return await NotificationModel.countDocuments({ userId, read: false });
   }
+
+  // ===========================================
+  // TREATMENT PLAN METHODS  
+  // ============================================
+
+  async getTreatmentPlanByPatientId(patientId: string): Promise<any> {
+    const plan = await TreatmentPlanModel.findOne({
+      patientId,
+      status: { $ne: 'cancelled' }
+    }).sort({ createdAt: -1 });
+    return toPlainObject(plan);
+  }
+
+  async createTreatmentPlan(insertPlan: any): Promise<any> {
+    const plan = await TreatmentPlanModel.create(insertPlan);
+    return toPlainObject(plan);
+  }
+
+  async updateTreatmentPlan(id: string, updateData: any): Promise<any> {
+    if (!isValidObjectId(id)) return undefined;
+    const plan = await TreatmentPlanModel.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true }
+    );
+    return toPlainObject(plan);
+  }
 }
 
 export const storage = new MongoStorage();

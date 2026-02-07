@@ -42,18 +42,7 @@ export function ProtectedRoute({
     // Check role-based access
     if (allowedRoles && allowedRoles.length > 0) {
         if (!allowedRoles.includes(userType)) {
-            return (
-                <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-                    <div className="text-6xl">🚫</div>
-                    <h2 className="text-2xl font-bold text-destructive">غير مصرح</h2>
-                    <p className="text-muted-foreground text-center max-w-md">
-                        لا تملك صلاحية للوصول لهذه الصفحة. يرجى التواصل مع المسؤول إذا كنت تعتقد أن هذا خطأ.
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                        You do not have permission to access this page.
-                    </p>
-                </div>
-            );
+            return <Redirect to="/unauthorized" />;
         }
     }
 
@@ -84,10 +73,39 @@ export function DoctorRoute({ children }: { children: React.ReactNode }) {
 
 /**
  * Helper component for medical staff routes (doctor, graduate, student)
+ * Supports custom role filtering for flexibility
  */
-export function MedicalStaffRoute({ children }: { children: React.ReactNode }) {
+export function MedicalStaffRoute({
+    children,
+    allowedRoles
+}: {
+    children: React.ReactNode;
+    allowedRoles?: string[];
+}) {
     return (
-        <ProtectedRoute allowedRoles={['doctor', 'graduate', 'student', 'admin']}>
+        <ProtectedRoute allowedRoles={allowedRoles || ['doctor', 'graduate', 'student', 'admin']}>
+            {children}
+        </ProtectedRoute>
+    );
+}
+
+/**
+ * Helper component for patient-only routes
+ */
+export function PatientRoute({ children }: { children: React.ReactNode }) {
+    return (
+        <ProtectedRoute allowedRoles={['patient', 'admin']}>
+            {children}
+        </ProtectedRoute>
+    );
+}
+
+/**
+ * Helper component for doctor-only routes (e.g., pricing management)
+ */
+export function DoctorOnlyRoute({ children }: { children: React.ReactNode }) {
+    return (
+        <ProtectedRoute allowedRoles={['doctor', 'admin']}>
             {children}
         </ProtectedRoute>
     );

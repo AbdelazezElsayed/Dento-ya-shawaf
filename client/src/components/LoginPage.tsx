@@ -159,36 +159,77 @@ export default function LoginPage({ onLogin, onSignUpClick }: LoginPageProps) {
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${loginBg})` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/80 to-primary/70" />
+        {/* 70% overlay = 30% image visibility */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/75 via-primary/70 to-primary/65" />
 
-        <div className={`relative z-10 flex flex-col justify-center p-12 text-white ${language === "ar" ? "text-right" : "text-left"}`}>
+        {/* Centered content container */}
+        <div className="relative z-10 flex flex-col items-center justify-center p-12 text-white w-full h-full text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
+            className="max-w-2xl"
           >
-            <h1 className="text-5xl font-bold mb-4">{t.title}</h1>
-            <h2 className="text-2xl font-medium mb-2 opacity-90">{t.subtitle}</h2>
-            <p className="text-lg opacity-80">{t.university}</p>
+            {/* Title with stronger shadow for maximum clarity */}
+            <h1
+              className="text-7xl font-extrabold mb-8 drop-shadow-2xl"
+              style={{
+                textShadow: '3px 3px 8px rgba(0,0,0,0.6), 1px 1px 4px rgba(0,0,0,0.8)'
+              }}
+            >
+              {t.title}
+            </h1>
+            <h2
+              className="text-4xl font-bold mb-4 drop-shadow-xl"
+              style={{
+                textShadow: '2px 2px 6px rgba(0,0,0,0.5), 1px 1px 3px rgba(0,0,0,0.7)'
+              }}
+            >
+              {t.subtitle}
+            </h2>
+            <p
+              className="text-2xl font-bold mb-20 drop-shadow-lg"
+              style={{
+                textShadow: '2px 2px 5px rgba(0,0,0,0.5), 1px 1px 3px rgba(0,0,0,0.6)'
+              }}
+            >
+              {t.university}
+            </p>
 
-            <div className="mt-12 space-y-4">
-              <div className="flex items-center gap-3 opacity-80">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                  <Stethoscope className="w-5 h-5" />
+            {/* Feature list - centered with larger text */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-center gap-5">
+                <div className="w-14 h-14 rounded-full bg-white/40 flex items-center justify-center backdrop-blur-sm shadow-lg">
+                  <Stethoscope className="w-7 h-7" />
                 </div>
-                <span>{language === "ar" ? "12+ عيادة متخصصة" : "12+ Specialized Clinics"}</span>
+                <span
+                  className="text-xl font-extrabold drop-shadow-lg"
+                  style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
+                >
+                  {language === "ar" ? "12+ عيادة متخصصة" : "12+ Specialized Clinics"}
+                </span>
               </div>
-              <div className="flex items-center gap-3 opacity-80">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                  <Users className="w-5 h-5" />
+              <div className="flex items-center justify-center gap-5">
+                <div className="w-14 h-14 rounded-full bg-white/40 flex items-center justify-center backdrop-blur-sm shadow-lg">
+                  <Users className="w-7 h-7" />
                 </div>
-                <span>{language === "ar" ? "فريق طبي متميز" : "Expert Medical Team"}</span>
+                <span
+                  className="text-xl font-extrabold drop-shadow-lg"
+                  style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
+                >
+                  {language === "ar" ? "فريق طبي متميز" : "Expert Medical Team"}
+                </span>
               </div>
-              <div className="flex items-center gap-3 opacity-80">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                  <UserCircle className="w-5 h-5" />
+              <div className="flex items-center justify-center gap-5">
+                <div className="w-14 h-14 rounded-full bg-white/40 flex items-center justify-center backdrop-blur-sm shadow-lg">
+                  <UserCircle className="w-7 h-7" />
                 </div>
-                <span>{language === "ar" ? "رعاية صحية شاملة" : "Comprehensive Healthcare"}</span>
+                <span
+                  className="text-xl font-extrabold drop-shadow-lg"
+                  style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
+                >
+                  {language === "ar" ? "رعاية صحية شاملة" : "Comprehensive Healthcare"}
+                </span>
               </div>
             </div>
           </motion.div>

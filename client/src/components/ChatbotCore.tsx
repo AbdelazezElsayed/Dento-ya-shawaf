@@ -3,7 +3,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Send, Upload, Bot, User, Loader2 } from "lucide-react";
+import { Send, Upload, Bot, User, Loader2, Sparkles, Zap } from "lucide-react";
+import { motion } from "framer-motion";
 
 type Message = {
     id: string;
@@ -210,150 +211,218 @@ export default function ChatbotCore({
 
     return (
         <div className={`flex flex-col h-full ${className}`}>
-            <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-                <div className="space-y-4">
-                    {messages.map((message) => (
-                        <div
+            <ScrollArea className="flex-1 p-6" ref={scrollRef}>
+                <div className="space-y-6 max-w-4xl mx-auto">
+                    {messages.map((message, index) => (
+                        <motion.div
                             key={message.id}
-                            className={`flex gap-2 ${message.role === "user" ? "justify-end" : "justify-start"
-                                }`}
+                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            transition={{ duration: 0.3, delay: index * 0.05 }}
+                            className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
                         >
                             {message.role === "bot" && (
-                                <div className="flex-shrink-0">
-                                    <div className="p-2 bg-primary/10 rounded-full">
-                                        <Bot className="w-4 h-4 text-primary" />
+                                <motion.div
+                                    className="flex-shrink-0"
+                                    whileHover={{ scale: 1.1, rotate: 5 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full shadow-lg">
+                                        <Bot className="w-5 h-5 text-white" />
                                     </div>
-                                </div>
+                                </motion.div>
                             )}
 
-                            <div
-                                className={`max-w-[75%] ${message.role === "user" ? "order-first" : ""
-                                    }`}
-                            >
-                                <div
-                                    className={`rounded-lg p-3 ${message.role === "user"
-                                        ? "bg-primary text-primary-foreground"
-                                        : "bg-muted"
+                            <div className={`max-w-[75%] ${message.role === "user" ? "order-first" : ""}`}>
+                                <motion.div
+                                    whileHover={{ scale: 1.02 }}
+                                    className={`rounded-2xl p-4 shadow-md ${message.role === "user"
+                                        ? "bg-gradient-to-br from-emerald-500 to-teal-600 text-white"
+                                        : "bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700"
                                         }`}
                                 >
                                     {message.image && (
-                                        <img
+                                        <motion.img
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
                                             src={message.image}
                                             alt="Uploaded"
-                                            className="rounded mb-2 max-w-full"
+                                            className="rounded-xl mb-3 max-w-full shadow-md"
                                         />
                                     )}
-                                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                    <p className={`text-base leading-relaxed whitespace-pre-wrap ${message.role === "user" ? "text-white" : "text-slate-800 dark:text-slate-100"
+                                        }`}>
+                                        {message.content}
+                                    </p>
                                     {message.suggestedClinic && (
-                                        <Badge className="mt-2 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs">
-                                            {language === "ar" ? "العيادة المقترحة: " : "Suggested Clinic: "}
-                                            {message.suggestedClinic}
-                                        </Badge>
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.2 }}
+                                        >
+                                            <Badge className="mt-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md px-3 py-1">
+                                                {language === "ar" ? "🏥 العيادة المقترحة: " : "🏥 Suggested Clinic: "}
+                                                {message.suggestedClinic}
+                                            </Badge>
+                                        </motion.div>
                                     )}
-                                </div>
-                                <p className="text-xs text-muted-foreground mt-1 px-1">
+                                </motion.div>
+                                <p className={`text-xs text-slate-500 dark:text-slate-400 mt-2 px-2 ${message.role === "user" ? "text-right" : "text-left"
+                                    }`}>
                                     {message.timestamp.toLocaleTimeString(
                                         language === "ar" ? "ar-EG" : "en-US",
-                                        {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                        }
+                                        { hour: "2-digit", minute: "2-digit" }
                                     )}
                                 </p>
                             </div>
 
                             {message.role === "user" && (
-                                <div className="flex-shrink-0">
-                                    <div className="p-2 bg-primary rounded-full">
-                                        <User className="w-4 h-4 text-primary-foreground" />
+                                <motion.div
+                                    className="flex-shrink-0"
+                                    whileHover={{ scale: 1.1, rotate: -5 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full shadow-lg">
+                                        <User className="w-5 h-5 text-white" />
                                     </div>
-                                </div>
+                                </motion.div>
                             )}
-                        </div>
+                        </motion.div>
                     ))}
 
                     {isLoading && (
-                        <div className="flex gap-2 justify-start">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex gap-3 justify-start"
+                        >
                             <div className="flex-shrink-0">
-                                <div className="p-2 bg-primary/10 rounded-full">
-                                    <Bot className="w-4 h-4 text-primary" />
+                                <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full shadow-lg">
+                                    <Bot className="w-5 h-5 text-white" />
                                 </div>
                             </div>
-                            <div className="bg-muted rounded-lg p-3">
-                                <div className="flex gap-1">
-                                    <span className="w-2 h-2 bg-primary rounded-full animate-bounce" />
-                                    <span className="w-2 h-2 bg-primary rounded-full animate-bounce delay-100" />
-                                    <span className="w-2 h-2 bg-primary rounded-full animate-bounce delay-200" />
+                            <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-md">
+                                <div className="flex gap-1.5">
+                                    <motion.span
+                                        className="w-2.5 h-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
+                                        animate={{ y: [0, -8, 0] }}
+                                        transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut" }}
+                                    />
+                                    <motion.span
+                                        className="w-2.5 h-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
+                                        animate={{ y: [0, -8, 0] }}
+                                        transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+                                    />
+                                    <motion.span
+                                        className="w-2.5 h-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
+                                        animate={{ y: [0, -8, 0] }}
+                                        transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+                                    />
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     )}
                 </div>
             </ScrollArea>
 
-            {/* Quick Symptoms */}
+            {/* Quick Symptoms - Modern Pills */}
             {messages.length === 1 && quickSymptoms.length > 0 && (
-                <div className="px-4 py-3 border-t">
-                    <div className="grid grid-cols-2 gap-2">
-                        {quickSymptoms.map((symptom, idx) => (
-                            <Button
-                                key={idx}
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleQuickSymptom(symptom.label)}
-                                className="text-xs justify-start"
-                                data-testid={`button-quick-symptom-${idx}`}
-                            >
-                                <span className="mr-1">{symptom.emoji}</span>
-                                {symptom.label}
-                            </Button>
-                        ))}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="px-6 py-4 border-t bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-950"
+                >
+                    <div className="max-w-4xl mx-auto">
+                        <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3 flex items-center gap-2">
+                            <Sparkles className="w-4 h-4" />
+                            {language === "ar" ? "اختصارات سريعة:" : "Quick Replies:"}
+                        </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {quickSymptoms.map((symptom, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    transition={{ delay: 0.4 + idx * 0.1, duration: 0.3 }}
+                                    whileHover={{ scale: 1.05, y: -2 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    <Button
+                                        size="lg"
+                                        variant="outline"
+                                        onClick={() => handleQuickSymptom(symptom.label)}
+                                        className="w-full h-auto py-3 px-4 rounded-full border-2 bg-white dark:bg-slate-800 hover:bg-gradient-to-r hover:from-blue-500 hover:to-cyan-500 hover:text-white hover:border-transparent transition-all duration-300 shadow-sm hover:shadow-md group"
+                                        data-testid={`button-quick-symptom-${idx}`}
+                                    >
+                                        <span className="text-2xl mr-2 group-hover:scale-110 transition-transform">{symptom.emoji}</span>
+                                        <span className="font-medium">{symptom.label}</span>
+                                    </Button>
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                </motion.div>
             )}
 
-            {/* Input Area */}
-            <div className="border-t p-4">
-                <div className="flex gap-2">
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageUpload}
-                        data-testid="input-image-upload"
-                    />
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isLoading}
-                        data-testid="button-upload-image"
-                    >
-                        <Upload className="h-4 w-4" />
-                    </Button>
-                    <Input
-                        placeholder={
-                            language === "ar" ? "اكتب رسالتك..." : "Type your message..."
-                        }
-                        value={inputMessage}
-                        onChange={(e) => setInputMessage(e.target.value)}
-                        onKeyPress={(e) => e.key === "Enter" && !isLoading && handleSendMessage()}
-                        disabled={isLoading}
-                        data-testid="input-chatbot-message"
-                    />
-                    <Button
-                        onClick={() => handleSendMessage()}
-                        disabled={isLoading || !inputMessage.trim()}
-                        size="icon"
-                        data-testid="button-send-message"
-                    >
-                        {isLoading ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                            <Send className="h-4 w-4" />
-                        )}
-                    </Button>
+            {/* Input Area - Modern Design */}
+            <div className="border-t bg-white dark:bg-slate-900 p-6 shadow-lg">
+                <div className="max-w-4xl mx-auto">
+                    <div className="flex gap-3 items-end">
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleImageUpload}
+                            data-testid="input-image-upload"
+                        />
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isLoading}
+                                data-testid="button-upload-image"
+                                className="h-12 w-12 rounded-full border-2 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 hover:from-purple-500 hover:to-pink-500 hover:text-white transition-all duration-300 shadow-md hover:shadow-lg"
+                            >
+                                <Upload className="h-5 w-5" />
+                            </Button>
+                        </motion.div>
+                        <div className="flex-1 relative">
+                            <Input
+                                placeholder={language === "ar" ? "اكتب رسالتك..." : "Type your message..."}
+                                value={inputMessage}
+                                onChange={(e) => setInputMessage(e.target.value)}
+                                onKeyPress={(e) => e.key === "Enter" && !isLoading && handleSendMessage()}
+                                disabled={isLoading}
+                                data-testid="input-chatbot-message"
+                                className="h-14 px-6 text-base rounded-2xl border-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 shadow-sm transition-all duration-300"
+                            />
+                        </div>
+                        <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <Button
+                                onClick={() => handleSendMessage()}
+                                disabled={isLoading || !inputMessage.trim()}
+                                size="icon"
+                                data-testid="button-send-message"
+                                className="h-14 w-14 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isLoading ? (
+                                    <Loader2 className="h-6 w-6 animate-spin" />
+                                ) : (
+                                    <Send className="h-6 w-6" />
+                                )}
+                            </Button>
+                        </motion.div>
+                    </div>
+                    <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-3 flex items-center justify-center gap-1">
+                        <Zap className="w-3 h-3" />
+                        {language === "ar" ? "مدعوم بالذكاء الاصطناعي" : "Powered by AI"}
+                    </p>
                 </div>
             </div>
         </div>

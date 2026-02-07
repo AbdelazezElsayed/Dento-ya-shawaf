@@ -650,6 +650,205 @@ export default function AIDiagnosisPage() {
     setIsAnalyzing(false);
   };
 
+  const handleDownloadPDF = () => {
+    if (!diagnosisResult) return;
+
+    const reportContent = `
+DENTO HEALTHCARE - AI DIAGNOSIS REPORT
+${'='.repeat(50)}
+
+Generated: ${new Date().toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}
+Patient: ${user?.fullName || user?.email || 'Unknown'}
+
+DIAGNOSIS RESULTS
+${'-'.repeat(50)}
+
+Urgency Level: ${diagnosisResult.urgency.toUpperCase()}
+Confidence: ${diagnosisResult.confidence}%
+${diagnosisResult.estimatedTreatmentTime ? `Treatment Time: ${diagnosisResult.estimatedTreatmentTime}\n` : ''}
+
+CONDITIONS DETECTED:
+${diagnosisResult.conditions.map((c, i) => `
+${i + 1}. ${language === 'ar' ? c.name : c.nameEn || c.name} (${c.probability}%)
+   ${c.description || ''}`).join('\n')}
+
+RECOMMENDATIONS:
+${diagnosisResult.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')}
+
+${diagnosisResult.suggestedClinic ? `\nSUGGESTED CLINIC:\n${language === 'ar' ? diagnosisResult.suggestedClinic.nameAr : diagnosisResult.suggestedClinic.nameEn || diagnosisResult.suggestedClinic.name}\n` : ''}
+DISCLAIMER:
+${'-'.repeat(50)}
+${diagnosisResult.disclaimer?.text || ''}
+
+This is a preliminary AI-assisted assessment. Please consult
+a licensed dental professional for proper medical advice.
+
+${'='.repeat(50)}
+`;
+
+    const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `diagnosis-report-${new Date().getTime()}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handlePrint = () => {
+    if (!diagnosisResult) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert(language === 'ar' ? 'الرجاء السماح بالنوافذ المنبثقة' : 'Please allow popups');
+      return;
+    }
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html dir="${language === 'ar' ? 'rtl' : 'ltr'}">
+      <head>
+        <meta charset="UTF-8">
+        <title>AI Diagnosis Report</title>
+        <style>
+          @media print {
+            body { margin: 0; padding: 20mm; }
+            .no-print { display: none; }
+          }
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+            color: #333;
+          }
+          .header {
+            text-align: center;
+            border-bottom: 3px solid #0891b2;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .header h1 {
+            color: #0891b2;
+            margin: 0 0 10px 0;
+          }
+          .section {
+            margin-bottom: 25px;
+          }
+          .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0891b2;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #e5e7eb;
+          }
+          .condition {
+            background: #f3f4f6;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-${language === 'ar' ? 'right' : 'left'}: 4px solid #0891b2;
+          }
+          .meta {
+            display: flex;
+            justify-content: space-between;
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+          }
+          .recommendation {
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+          }
+          .disclaimer {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            font-size: 14px;
+          }
+          .urgency {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+          }
+          .urgency-high { background: #fee2e2; color: #991b1b; }
+          .urgency-medium { background: #fef3c7; color: #92400e; }
+          .urgency-low { background: #d1fae5; color: #065f46; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>${language === 'ar' ? 'تقرير التشخيص الذكي' : 'AI Diagnosis Report'}</h1>
+          <p>${language === 'ar' ? 'نظام دينتو للرعاية الصحية' : 'Dento Healthcare System'}</p>
+        </div>
+
+        <div class="meta">
+          <div><strong>${language === 'ar' ? 'التاريخ' : 'Date'}:</strong> ${new Date().toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}</div>
+          <div><strong>${language === 'ar' ? 'المريض' : 'Patient'}:</strong> ${user?.fullName || user?.email || 'Unknown'}</div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">${language === 'ar' ? 'ملخص النتائج' : 'Results Summary'}</div>
+          <p>
+            <strong>${language === 'ar' ? 'مستوى الأهمية' : 'Urgency'}:</strong> 
+            <span class="urgency urgency-${diagnosisResult.urgency}">${diagnosisResult.urgency}</span>
+          </p>
+          <p><strong>${language === 'ar' ? 'مستوى الثقة' : 'Confidence'}:</strong> ${diagnosisResult.confidence}%</p>
+          ${diagnosisResult.estimatedTreatmentTime ? `<p><strong>${language === 'ar' ? 'وقت العلاج المتوقع' : 'Estimated Treatment Time'}:</strong> ${diagnosisResult.estimatedTreatmentTime}</p>` : ''}
+        </div>
+
+        <div class="section">
+          <div class="section-title">${language === 'ar' ? 'الحالات المكتشفة' : 'Detected Conditions'}</div>
+          ${diagnosisResult.conditions.map(c => `
+            <div class="condition">
+              <strong>${language === 'ar' ? c.name : c.nameEn || c.name}</strong> (${c.probability}%)
+              ${c.description ? `<p>${c.description}</p>` : ''}
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="section">
+          <div class="section-title">${language === 'ar' ? 'التوصيات' : 'Recommendations'}</div>
+          ${diagnosisResult.recommendations.map((r, i) => `
+            <div class="recommendation">${i + 1}. ${r}</div>
+          `).join('')}
+        </div>
+
+        ${diagnosisResult.suggestedClinic ? `
+          <div class="section">
+            <div class="section-title">${language === 'ar' ? 'العيادة المقترحة' : 'Suggested Clinic'}</div>
+            <p>${language === 'ar' ? diagnosisResult.suggestedClinic.nameAr : diagnosisResult.suggestedClinic.nameEn || diagnosisResult.suggestedClinic.name}</p>
+          </div>
+        ` : ''}
+
+        <div class="disclaimer">
+          <strong>⚠️ ${language === 'ar' ? 'إخلاء مسؤولية هام' : 'Important Disclaimer'}:</strong>
+          <p>${diagnosisResult.disclaimer?.text || (language === 'ar' ? 'هذا تقييم أولي بواسطة الذكاء الاصطناعي. يجب استشارة طبيب مرخص.' : 'This is a preliminary AI assessment. Please consult a licensed professional.')}</p>
+        </div>
+
+        <script>
+          window.onload = function() {
+            window.print();
+          }
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+  };
+
   const currentQuestion = diagnosisQuestions[currentStep];
   const progress = ((currentStep + 1) / diagnosisQuestions.length) * 100;
 
@@ -676,7 +875,7 @@ export default function AIDiagnosisPage() {
           </div>
         </div>
 
-        <h3 className="text-xl font-semibold">{questionText}</h3>
+        <h3 className={`text-xl font-semibold ${language === "ar" ? "text-right" : "text-left"}`}>{questionText}</h3>
 
         {currentQuestion.type === "radio" && currentQuestion.options && (
           <RadioGroup
@@ -692,13 +891,17 @@ export default function AIDiagnosisPage() {
               >
                 <Label
                   htmlFor={option.value}
-                  className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${answers[currentQuestion.id] === option.value
+                  className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${language === "ar" ? "flex-row-reverse" : "flex-row"
+                    } ${answers[currentQuestion.id] === option.value
                       ? "border-primary bg-primary/5"
                       : "border-muted hover:border-primary/50"
                     }`}
+                  dir={language === "ar" ? "rtl" : "ltr"}
                 >
                   <RadioGroupItem value={option.value} id={option.value} />
-                  <span>{language === "ar" ? option.label : option.labelEn}</span>
+                  <span className={language === "ar" ? "text-right flex-1" : "text-left flex-1"}>
+                    {language === "ar" ? option.label : option.labelEn}
+                  </span>
                 </Label>
               </motion.div>
             ))}
@@ -720,12 +923,12 @@ export default function AIDiagnosisPage() {
                   whileTap={{ scale: 0.9 }}
                   onClick={() => handleAnswer(currentQuestion.id, num.toString())}
                   className={`w-10 h-10 rounded-full font-bold transition-all ${answers[currentQuestion.id] === num.toString()
-                      ? num <= 3
-                        ? "bg-green-500 text-white"
-                        : num <= 6
-                          ? "bg-yellow-500 text-white"
-                          : "bg-red-500 text-white"
-                      : "bg-muted hover:bg-muted/80"
+                    ? num <= 3
+                      ? "bg-green-500 text-white"
+                      : num <= 6
+                        ? "bg-yellow-500 text-white"
+                        : "bg-red-500 text-white"
+                    : "bg-muted hover:bg-muted/80"
                     }`}
                 >
                   {num}
@@ -919,7 +1122,9 @@ export default function AIDiagnosisPage() {
                       <Stethoscope className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <p className="font-bold text-lg">{diagnosisResult.suggestedClinic.name}</p>
+                      <p className="font-bold text-lg">
+                        {language === "ar" ? diagnosisResult.suggestedClinic.nameAr : diagnosisResult.suggestedClinic.nameEn}
+                      </p>
                       <p className="text-sm text-muted-foreground">
                         {language === "ar" ? diagnosisResult.suggestedClinic.nameEn : diagnosisResult.suggestedClinic.nameAr}
                       </p>
@@ -972,10 +1177,10 @@ export default function AIDiagnosisPage() {
 
           <div className="flex flex-wrap gap-3">
             <Button className="flex-1" data-testid="button-book-appointment">
-              <Calendar className="w-4 h-4 mr-2" />
+              <Calendar className="w-4 w-4 mr-2" />
               {t.bookAppointment}
             </Button>
-            <Button variant="outline" data-testid="button-download-report">
+            <Button variant="outline" onClick={handleDownloadPDF} data-testid="button-download-report">
               <Download className="w-4 h-4 mr-2" />
               {t.downloadReport}
             </Button>
@@ -983,7 +1188,7 @@ export default function AIDiagnosisPage() {
               <Share2 className="w-4 h-4 mr-2" />
               {t.shareResult}
             </Button>
-            <Button variant="outline" data-testid="button-print-result">
+            <Button variant="outline" onClick={handlePrint} data-testid="button-print-result">
               <Printer className="w-4 h-4 mr-2" />
               {t.printResult}
             </Button>

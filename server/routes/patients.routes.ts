@@ -181,4 +181,131 @@ router.put('/:id', requireAuth, async (req, res) => {
     }
 });
 
+// ============================================
+// TREATMENT PLAN ENDPOINTS
+// ============================================
+
+// Get treatment plan for a specific patient
+router.get('/:patientId/treatment-plan', requireAuth, async (req, res) => {
+    try {
+        const { patientId } = req.params;
+        const userId = req.session.userId!;
+        const userType = req.session.userType!;
+
+        // Check access: patient can only view their own, medical staff can view any
+        if (userType === USER_TYPES.PATIENT) {
+            const patient = await storage.getPatient(patientId);
+            if (!patient || patient.userId !== userId) {
+                return res.status(403).json({
+                    message: 'غير مصرح بالوصول',
+                    messageEn: 'Access denied'
+                });
+            }
+        }
+
+        const treatmentPlan = await storage.getTreatmentPlanByPatientId(patientId);
+
+        if (!treatmentPlan) {
+            return res.status(404).json({
+                message: 'لم يتم العثور على خطة علاجية',
+                messageEn: 'Treatment plan not found'
+            });
+        }
+
+        res.json(treatmentPlan);
+    } catch (err: any) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Update treatment plan for a patient (doctors only)
+router.put('/:patientId/treatment-plan', requireMedicalStaff, async (req, res) => {
+    try {
+        const { patientId } = req.params;
+        const userId = req.session.userId!;
+        const {
+            title,
+            description,
+            planStartDate,
+            estimatedDuration,
+            procedures,
+            appointments,
+            notes,
+            status
+        } = req.body;
+
+        // Validate patient exists
+        const patient = await storage.getPatient(patientId);
+        if (!patient) {
+            return res.status(404).json({
+                message: 'المريض غير موجود',
+                messageEn: 'Patient not found'
+            });
+        }
+
+        // Get doctor info for doctorName
+        const doctor = await storage.getDoctorByUserId(userId);
+        const doctorName = doctor?.fullName || '';
+
+        // Check if treatment plan exists
+        const existingPlan = await storage.getTreatmentPlanByPatientId(patientId);
+
+        let treatmentPlan;
+        if (existingPlan) {
+            // Update existing plan
+            treatmentPlan = await storage.updateTreatmentPlan(existingPlan._id, {
+                title,
+                description,
+                planStartDate,
+                estimatedDuration,
+                procedures: procedures || [],
+                appointments: appointments || [],
+                notes,
+                status: status || 'active',
+                doctorName,
+                updatedAt: new Date()
+            });
+
+            await logAudit({
+                userId,
+                action: 'update_treatment_plan',
+                entityType: 'treatment_plan',
+                entityId: existingPlan._id
+            });
+        } else {
+            // Create new treatment plan
+            treatmentPlan = await storage.createTreatmentPlan({
+                patientId,
+                doctorId: userId,
+                doctorName,
+                title,
+                description,
+                planStartDate,
+                estimatedDuration,
+                procedures: procedures || [],
+                appointments: appointments || [],
+                notes,
+                status: status || 'active',
+                updatedAt: new Date()
+            });
+
+            await logAudit({
+                userId,
+                action: 'create_treatment_plan',
+                entityType: 'treatment_plan',
+                entityId: treatmentPlan._id
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'تم حفظ الخطة العلاجية بنجاح',
+            messageEn: 'Treatment plan saved successfully',
+            data: treatmentPlan
+        });
+    } catch (err: any) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 export default router;

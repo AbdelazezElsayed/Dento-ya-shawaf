@@ -170,18 +170,53 @@ const treatmentSchema = new mongoose.Schema({
 // TREATMENT PLAN SCHEMA
 // ============================================
 const treatmentPlanSchema = new mongoose.Schema({
-  patientId: { type: String, required: true },
+  patientId: { type: String, required: true, index: true },
   doctorId: { type: String, required: true },
+  doctorName: { type: String },
   title: { type: String, required: true },
   description: { type: String },
-  steps: { type: [String] },
+
+  // Timeline fields
+  planStartDate: { type: Date },
+  estimatedDuration: { type: String }, // e.g., "3-6 months"
+
+  // Detailed procedures
+  procedures: [{
+    name: { type: String, required: true },
+    description: { type: String },
+    status: {
+      type: String,
+      enum: ['scheduled', 'in-progress', 'completed'],
+      default: 'scheduled'
+    },
+    scheduledDate: { type: Date },
+    completedDate: { type: Date }
+  }],
+
+  // Appointments
+  appointments: [{
+    type: { type: String }, // e.g., "Follow-up", "Consultation"
+    clinic: { type: String },
+    date: { type: String },
+    time: { type: String }
+  }],
+
+  // Doctor's notes
+  notes: { type: String },
+
+  // Overall status
   status: {
     type: String,
     enum: ['active', 'completed', 'cancelled'],
     default: 'active'
   },
-  createdAt: { type: Date, default: Date.now }
+
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 });
+
+// Index for efficient querying
+treatmentPlanSchema.index({ patientId: 1, status: 1 });
 
 // ============================================
 // REPORT SCHEMA

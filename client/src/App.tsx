@@ -51,7 +51,8 @@ import SignUpPage from "@/pages/SignUpPage";
 import AIDiagnosisPage from "@/pages/AIDiagnosisPage";
 import TodayAppointmentsPage from "@/components/TodayAppointmentsPage";
 import PriceManagementPage from "@/components/PriceManagementPage";
-import { ProtectedRoute, AdminRoute, DoctorRoute, MedicalStaffRoute } from "@/components/ProtectedRoute";
+import UnauthorizedPage from "@/pages/UnauthorizedPage";
+import { ProtectedRoute, AdminRoute, DoctorRoute, MedicalStaffRoute, PatientRoute, DoctorOnlyRoute } from "@/components/ProtectedRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Stethoscope, Syringe, Scissors, Layers, Building2, Moon, Sun, Activity, Sparkles, Baby, Smile, User, Globe, MessageCircle, ArrowRight, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -198,12 +199,63 @@ function Dashboard() {
   }, [activePage]);
 
   const getBreadcrumbs = () => {
-    const breadcrumbs = [{ name: "الرئيسية", path: "home" }];
+    // Breadcrumb translations
+    const breadcrumbTranslations = {
+      ar: {
+        home: "الرئيسية",
+        clinics: "العيادات الطبية",
+        clinic: "العيادة",
+        treatmentPlans: "الخطط العلاجية",
+        reports: "التقارير والإحصائيات",
+        settings: "الإعدادات",
+        planDetails: "تفاصيل الخطة",
+        appointments: "حجز المواعيد",
+        doctors: "الأطباء",
+        medicalRecords: "السجل الطبي",
+        ratings: "التقييمات",
+        notifications: "الإشعارات",
+        search: "البحث",
+        payment: "الفواتير والدفع",
+        doctorPanel: "لوحة تحكم الطبيب",
+        adminPanel: "لوحة تحكم المسؤول",
+        supportTickets: "تذاكر الدعم",
+        financial: "الإدارة المالية",
+        chat: "Dento - مساعدك الطبي",
+        aiDiagnosis: "التشخيص الذكي",
+        todayAppointments: "مواعيد اليوم",
+        priceManagement: "إدارة الأسعار",
+        patients: "المرضى",
+      },
+      en: {
+        home: "Home",
+        clinics: "Clinics",
+        clinic: "Clinic",
+        treatmentPlans: "Treatment Plans",
+        reports: "Reports & Analytics",
+        settings: "Settings",
+        planDetails: "Plan Details",
+        appointments: "Book Appointment",
+        doctors: "Doctors",
+        medicalRecords: "Medical Records",
+        ratings: "Ratings",
+        notifications: "Notifications",
+        search: "Search",
+        payment: "Billing & Payment",
+        doctorPanel: "Doctor Panel",
+        adminPanel: "Admin Panel",
+        supportTickets: "Support Tickets",
+        financial: "Financial Management",
+        chat: "Dento - Your Medical Assistant",
+        aiDiagnosis: "AI Diagnosis",
+        todayAppointments: "Today's Appointments",
+        priceManagement: "Price Management",
+        patients: "Patients",
+      },
+    };
 
-    if (activePage.startsWith("clinic-")) {
-      breadcrumbs.push({ name: "العيادات الطبية", path: "clinics" });
-      const clinicId = activePage.replace("clinic-", "");
-      const clinicNames: Record<string, string> = {
+    // Clinic name translations
+    const clinicNames = {
+      ar: {
         diagnosis: "التشخيص والأشعة",
         conservative: "العلاج التحفظي",
         surgery: "جراحة الفم والفكين",
@@ -215,53 +267,76 @@ function Dashboard() {
         implants: "زراعة الأسنان",
         orthodontics: "تقويم الأسنان",
         pediatric: "أسنان الأطفال",
-      };
-      breadcrumbs.push({ name: clinicNames[clinicId] || "العيادة", path: activePage });
+      },
+      en: {
+        diagnosis: "Diagnosis & Radiology",
+        conservative: "Conservative Treatment",
+        surgery: "Oral & Maxillofacial Surgery",
+        removable: "Removable Prosthetics",
+        fixed: "Fixed Prosthetics",
+        gums: "Periodontics",
+        "oral-surgery": "Surgery",
+        cosmetic: "Cosmetic Dentistry",
+        implants: "Dental Implants",
+        orthodontics: "Orthodontics",
+        pediatric: "Pediatric Dentistry",
+      },
+    };
+
+    const t = breadcrumbTranslations[language];
+    const clinicT = clinicNames[language];
+
+    const breadcrumbs = [{ name: t.home, path: "home" }];
+
+    if (activePage.startsWith("clinic-")) {
+      breadcrumbs.push({ name: t.clinics, path: "clinics" });
+      const clinicId = activePage.replace("clinic-", "");
+      breadcrumbs.push({ name: clinicT[clinicId as keyof typeof clinicT] || t.clinic, path: activePage });
     } else if (activePage === "treatment-plans") {
-      breadcrumbs.push({ name: "الخطط العلاجية", path: activePage });
+      breadcrumbs.push({ name: t.treatmentPlans, path: activePage });
     } else if (activePage === "reports") {
-      breadcrumbs.push({ name: "التقارير والإحصائيات", path: activePage });
+      breadcrumbs.push({ name: t.reports, path: activePage });
     } else if (activePage === "dentocad") {
       breadcrumbs.push({ name: "Dentocad", path: activePage });
     } else if (activePage === "settings") {
-      breadcrumbs.push({ name: "الإعدادات", path: activePage });
+      breadcrumbs.push({ name: t.settings, path: activePage });
     } else if (activePage === "treatment-plan-detail") {
-      breadcrumbs.push({ name: "الخطط العلاجية", path: "treatment-plans" });
-      breadcrumbs.push({ name: "تفاصيل الخطة", path: activePage });
+      breadcrumbs.push({ name: t.treatmentPlans, path: "treatment-plans" });
+      breadcrumbs.push({ name: t.planDetails, path: activePage });
     } else if (activePage === "appointments") {
-      breadcrumbs.push({ name: "حجز المواعيد", path: activePage });
+      breadcrumbs.push({ name: t.appointments, path: activePage });
     } else if (activePage === "doctors") {
-      breadcrumbs.push({ name: "الأطباء", path: activePage });
+      breadcrumbs.push({ name: t.doctors, path: activePage });
     } else if (activePage === "medical-records") {
-      breadcrumbs.push({ name: "السجل الطبي", path: activePage });
+      breadcrumbs.push({ name: t.medicalRecords, path: activePage });
     } else if (activePage === "ratings") {
-      breadcrumbs.push({ name: "التقييمات", path: activePage });
+      breadcrumbs.push({ name: t.ratings, path: activePage });
     } else if (activePage === "notifications") {
-      breadcrumbs.push({ name: "الإشعارات", path: activePage });
+      breadcrumbs.push({ name: t.notifications, path: activePage });
     } else if (activePage === "search") {
-      breadcrumbs.push({ name: "البحث", path: activePage });
+      breadcrumbs.push({ name: t.search, path: activePage });
     } else if (activePage === "payment") {
-      breadcrumbs.push({ name: "الفواتير والدفع", path: activePage });
+      breadcrumbs.push({ name: t.payment, path: activePage });
     } else if (activePage === "doctor-panel") {
-      breadcrumbs.push({ name: "لوحة تحكم الطبيب", path: activePage });
+      breadcrumbs.push({ name: t.doctorPanel, path: activePage });
     } else if (activePage === "admin-panel") {
-      breadcrumbs.push({ name: "لوحة تحكم المسؤول", path: activePage });
+      breadcrumbs.push({ name: t.adminPanel, path: activePage });
     } else if (activePage === "support-tickets") {
-      breadcrumbs.push({ name: "تذاكر الدعم", path: activePage });
+      breadcrumbs.push({ name: t.supportTickets, path: activePage });
     } else if (activePage === "financial") {
-      breadcrumbs.push({ name: "الإدارة المالية", path: activePage });
+      breadcrumbs.push({ name: t.financial, path: activePage });
     } else if (activePage === "chat") {
-      breadcrumbs.push({ name: "Dento - مساعدك الطبي", path: activePage });
+      breadcrumbs.push({ name: t.chat, path: activePage });
     } else if (activePage === "clinics") {
-      breadcrumbs.push({ name: "العيادات الطبية", path: activePage });
+      breadcrumbs.push({ name: t.clinics, path: activePage });
     } else if (activePage === "ai-diagnosis") {
-      breadcrumbs.push({ name: "التشخيص الذكي", path: activePage });
+      breadcrumbs.push({ name: t.aiDiagnosis, path: activePage });
     } else if (activePage === "today-appointments") {
-      breadcrumbs.push({ name: language === "ar" ? "مواعيد اليوم" : "Today's Appointments", path: activePage });
+      breadcrumbs.push({ name: t.todayAppointments, path: activePage });
     } else if (activePage === "price-management") {
-      breadcrumbs.push({ name: language === "ar" ? "إدارة الأسعار" : "Price Management", path: activePage });
+      breadcrumbs.push({ name: t.priceManagement, path: activePage });
     } else if (activePage === "patients") {
-      breadcrumbs.push({ name: language === "ar" ? "المرضى" : "Patients", path: activePage });
+      breadcrumbs.push({ name: t.patients, path: activePage });
     }
 
     return breadcrumbs;
@@ -364,7 +439,10 @@ function Dashboard() {
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-semibold">{userName}</p>
                 <p className="text-xs text-muted-foreground">
-                  {userType === "patient" ? "مريض" : userType === "doctor" ? "طبيب" : userType === "student" ? "طالب" : "إمتياز"}
+                  {language === "ar"
+                    ? (userType === "patient" ? "مريض" : userType === "doctor" ? "طبيب" : userType === "student" ? "طالب" : userType === "graduate" ? "إمتياز" : "مسؤول")
+                    : (userType === "patient" ? "Patient" : userType === "doctor" ? "Doctor" : userType === "student" ? "Student" : userType === "graduate" ? "Graduate" : "Admin")
+                  }
                 </p>
               </div>
               <Avatar data-testid="avatar-user">
@@ -441,8 +519,29 @@ function Dashboard() {
                   <Route path="/treatment-plan-detail">
                     <TreatmentPlanDetailPage onBackClick={() => handleNavigate("treatment-plans")} />
                   </Route>
+                  {/* Patient-Only Routes */}
+                  <Route path="/my-appointments">
+                    <PatientRoute>
+                      <MyAppointmentsPage />
+                    </PatientRoute>
+                  </Route>
+
+                  <Route path="/my-medications">
+                    <PatientRoute>
+                      <MedicationsPage />
+                    </PatientRoute>
+                  </Route>
+
+                  <Route path="/my-reviews">
+                    <PatientRoute>
+                      <MyReviewsPage />
+                    </PatientRoute>
+                  </Route>
+
                   <Route path="/appointments">
-                    <AppointmentBookingPageNew />
+                    <PatientRoute>
+                      <AppointmentBookingPageNew />
+                    </PatientRoute>
                   </Route>
                   <Route path="/doctors">
                     <DoctorManagementPage />
@@ -460,7 +559,9 @@ function Dashboard() {
                     <SearchPage />
                   </Route>
                   <Route path="/payment">
-                    <PaymentPageNew />
+                    <PatientRoute>
+                      <PaymentPageNew />
+                    </PatientRoute>
                   </Route>
                   <Route path="/support-tickets">
                     <SupportTicketsPage />
@@ -477,14 +578,22 @@ function Dashboard() {
                   <Route path="/ai-diagnosis">
                     <AIDiagnosisPage />
                   </Route>
+                  {/* Medical Staff Routes */}
                   <Route path="/today-appointments">
-                    <TodayAppointmentsPage language={language} />
+                    <MedicalStaffRoute>
+                      <TodayAppointmentsPage language={language} />
+                    </MedicalStaffRoute>
                   </Route>
+                  {/* Doctor-Only Routes */}
                   <Route path="/price-management">
-                    <PriceManagementPage language={language} />
+                    <DoctorOnlyRoute>
+                      <PriceManagementPage language={language} />
+                    </DoctorOnlyRoute>
                   </Route>
                   <Route path="/patients">
-                    <PatientList clinicName="الكل" onViewPatient={() => { }} />
+                    <MedicalStaffRoute>
+                      <PatientList clinicName="الكل" onViewPatient={() => { }} />
+                    </MedicalStaffRoute>
                   </Route>
                   <Route path="/clinics">
                     <ClinicsOverviewPage onNavigate={(page) => handleNavigate(page)} />
@@ -495,6 +604,12 @@ function Dashboard() {
                   <Route path="/settings">
                     <SettingsPage customPages={customPages} setCustomPages={setCustomPages} />
                   </Route>
+
+                  {/* Unauthorized Page */}
+                  <Route path="/unauthorized">
+                    <UnauthorizedPage />
+                  </Route>
+
                   <Route path="/">
                     <HomePage userName={userName} userType={userType} userId={userId} onNavigate={handleNavigate} language={language} />
                   </Route>

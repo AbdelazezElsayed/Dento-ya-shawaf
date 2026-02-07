@@ -273,6 +273,38 @@ ${contextMessages ? `المحادثة السابقة:\n${contextMessages}\n` : '
     }
 });
 
+// ============================================
+// GET DIAGNOSIS RECORDS FOR A PATIENT (Medical Staff Only)
+// ============================================
+router.get('/diagnosis/patient/:userId', requireAuth, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const currentUserType = req.session.userType;
+
+        // Only medical staff (doctors, students, graduates) and admins can view patient diagnosis
+        if (!['doctor', 'student', 'graduate', 'admin'].includes(currentUserType || '')) {
+            return res.status(403).json({
+                message: 'غير مصرح لك بالوصول لهذه البيانات',
+                messageEn: 'Access denied'
+            });
+        }
+
+        // Fetch all diagnosis records for this patient
+        const records = await DiagnosisRecordModel.find({
+            userId: userId,
+            deletedAt: null
+        }).sort({ createdAt: -1 }); // Most recent first
+
+        res.json(records);
+    } catch (error: any) {
+        logger.error('Error fetching patient diagnosis records:', error);
+        res.status(500).json({
+            message: 'حدث خطأ في تحميل السجلات',
+            messageEn: 'Error loading records'
+        });
+    }
+});
+
 // AI Diagnosis - NOW PROTECTED WITH AUTH
 router.post('/diagnosis', requireAuth, validateBody(aiDiagnosisSchema), async (req, res) => {
     const startTime = Date.now();

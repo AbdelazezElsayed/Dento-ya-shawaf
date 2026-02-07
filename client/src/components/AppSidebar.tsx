@@ -57,7 +57,10 @@ export default function AppSidebar({ customPages = [], userType = "patient", lan
       clinicDetails: "تفاصيل العيادات",
       treatmentPlans: "الخطة العلاجية للمريض",
       dentocad: "Dentocad",
+      myAppointments: "مواعيدي",
       bookAppointment: "حجز المواعيد",
+      myMedications: "أدويتي",
+      myReviews: "تقييماتي",
       doctors: "الأطباء",
       medicalRecords: "السجل الطبي",
       ratings: "التقييمات",
@@ -77,7 +80,10 @@ export default function AppSidebar({ customPages = [], userType = "patient", lan
       clinicDetails: "Clinic Details",
       treatmentPlans: "Treatment Plans",
       dentocad: "Dentocad",
+      myAppointments: "My Appointments",
       bookAppointment: "Book Appointment",
+      myMedications: "My Medications",
+      myReviews: "My Reviews",
       doctors: "Doctors",
       medicalRecords: "Medical Records",
       ratings: "Ratings",
@@ -214,18 +220,20 @@ export default function AppSidebar({ customPages = [], userType = "patient", lan
                 </SidebarMenuItem>
               </Collapsible>
 
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={activePage === "treatment-plans"}
-                  data-testid="nav-treatment-plans"
-                >
-                  <Link href="/treatment-plans">
-                    <ClipboardList className="w-4 h-4" />
-                    <span>{t.treatmentPlans}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {isPatient && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={activePage === "treatment-plans"}
+                    data-testid="nav-treatment-plans"
+                  >
+                    <Link href="/treatment-plans">
+                      <ClipboardList className="w-4 h-4" />
+                      <span>{t.treatmentPlans}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
 
               <SidebarMenuItem>
                 <SidebarMenuButton
@@ -255,6 +263,51 @@ export default function AppSidebar({ customPages = [], userType = "patient", lan
                 </SidebarMenuItem>
               )}
 
+              {isPatient && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={activePage === "my-appointments"}
+                    data-testid="nav-my-appointments"
+                  >
+                    <Link href="/my-appointments">
+                      <Calendar className="w-4 h-4" />
+                      <span>{t.myAppointments}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
+
+              {isPatient && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={activePage === "my-medications"}
+                    data-testid="nav-my-medications"
+                  >
+                    <Link href="/my-medications">
+                      <FileTextIcon className="w-4 h-4" />
+                      <span>{t.myMedications}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
+
+              {isPatient && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={activePage === "my-reviews"}
+                    data-testid="nav-my-reviews"
+                  >
+                    <Link href="/my-reviews">
+                      <Star className="w-4 h-4" />
+                      <span>{t.myReviews}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
+
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
@@ -268,18 +321,20 @@ export default function AppSidebar({ customPages = [], userType = "patient", lan
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={activePage === "medical-records"}
-                  data-testid="nav-medical-records"
-                >
-                  <Link href="/medical-records">
-                    <FileTextIcon className="w-4 h-4" />
-                    <span>{t.medicalRecords}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {isPatient && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={activePage === "medical-records"}
+                    data-testid="nav-medical-records"
+                  >
+                    <Link href="/medical-records">
+                      <FileTextIcon className="w-4 h-4" />
+                      <span>{t.medicalRecords}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
 
               <SidebarMenuItem>
                 <SidebarMenuButton

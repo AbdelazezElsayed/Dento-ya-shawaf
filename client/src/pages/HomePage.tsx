@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import DashboardStats from "@/components/DashboardStats";
+import MedicalStaffDashboard from "@/components/MedicalStaffDashboard";
 import { apiGet } from "@/services/api";
 import { motion } from "framer-motion";
+import { Calendar, MessageSquare, FileText, CreditCard, Phone, Smile, TrendingUp, Activity, Lightbulb, Clock } from "lucide-react";
 
 interface HomePageProps {
     userName: string;
@@ -30,6 +32,22 @@ export default function HomePage({
     onNavigate,
     language = "ar"
 }: HomePageProps) {
+    // If medical staff, show medical staff dashboard
+    const isMedicalStaff = ['doctor', 'student', 'graduate'].includes(userType);
+
+    if (isMedicalStaff) {
+        return (
+            <MedicalStaffDashboard
+                userName={userName}
+                userType={userType}
+                userId={userId}
+                onNavigate={onNavigate}
+                language={language}
+            />
+        );
+    }
+
+    // Patient Dashboard (existing code)
     const today = new Date();
     const [balance, setBalance] = useState<number>(0);
     const [nextAppointment, setNextAppointment] = useState<NextAppointment | null>(null);
@@ -115,11 +133,11 @@ export default function HomePage({
     };
 
     const quickActions = [
-        { icon: "📅", label: language === "ar" ? "حجز موعد" : "Book", page: "appointments", color: "bg-teal-500" },
-        { icon: "💬", label: language === "ar" ? "تواصل" : "Chat", page: "chat", color: "bg-emerald-500" },
-        { icon: "📋", label: language === "ar" ? "السجل" : "Records", page: "medical-records", color: "bg-cyan-500" },
-        { icon: "💳", label: language === "ar" ? "الدفع" : "Pay", page: "payment", color: "bg-amber-500" },
-        { icon: "🆘", label: language === "ar" ? "طوارئ" : "Emergency", page: "chat", color: "bg-red-500" },
+        { IconComponent: Calendar, label: language === "ar" ? "حجز موعد" : "Book", page: "appointments", color: "bg-teal-500" },
+        { IconComponent: MessageSquare, label: language === "ar" ? "تواصل" : "Chat", page: "chat", color: "bg-emerald-500" },
+        { IconComponent: FileText, label: language === "ar" ? "السجل" : "Records", page: "medical-records", color: "bg-cyan-500" },
+        { IconComponent: CreditCard, label: language === "ar" ? "الدفع" : "Pay", page: "payment", color: "bg-amber-500" },
+        { IconComponent: Phone, label: language === "ar" ? "طوارئ" : "Emergency", page: "chat", color: "bg-red-500" },
     ];
 
     const healthTips = language === "ar" ? [
@@ -141,31 +159,34 @@ export default function HomePage({
     const isRTL = language === "ar";
 
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="space-y-6"
         >
-            {/* Welcome Header */}
-            <motion.div 
+            {/* Welcome Header - Compact Professional Version */}
+            <motion.div
                 initial={{ scale: 0.95 }}
                 animate={{ scale: 1 }}
-                className="bg-gradient-to-l from-teal-500 to-teal-600 rounded-2xl p-6 text-white shadow-lg"
+                className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl p-5 text-white shadow-md hover:shadow-lg transition-shadow"
             >
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-teal-100 text-sm mb-1">
-                            {dayNames[today.getDay()]}، {today.getDate()} {monthNames[today.getMonth()]} {today.getFullYear()}
+                        <p className="text-teal-100 text-xs uppercase tracking-wide mb-1.5">
+                            {dayNames[today.getDay()]} · {today.getDate()} {monthNames[today.getMonth()]} {today.getFullYear()}
                         </p>
-                        <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                            {greeting()}، {userName}! 👋
+                        <h1 className="text-xl md:text-2xl font-bold mb-1 flex items-center gap-2">
+                            {greeting()}, {userName}
+                            <Smile className="w-5 h-5" />
                         </h1>
-                        <p className="text-teal-100">
+                        <p className="text-teal-50 text-sm font-medium">
                             {language === "ar" ? "ابتسامتك تبدأ من هنا" : "Your smile starts here"}
                         </p>
                     </div>
-                    <div className="hidden md:block text-6xl">😊</div>
+                    <div className="hidden md:flex items-center justify-center w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm">
+                        <Activity className="w-7 h-7" />
+                    </div>
                 </div>
             </motion.div>
 
@@ -173,14 +194,14 @@ export default function HomePage({
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Next Appointment */}
                 <motion.button
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.03, y: -2 }}
                     whileTap={{ scale: 0.98 }}
-                    className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 cursor-pointer hover:shadow-md transition-all text-right w-full"
+                    className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-md border border-slate-100 dark:border-slate-700 cursor-pointer hover:shadow-xl hover:border-teal-200 dark:hover:border-teal-700 transition-all text-right w-full group"
                     onClick={() => onNavigate?.("appointments")}
                 >
                     <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-full bg-teal-100 dark:bg-teal-900/50 flex items-center justify-center">
-                            <span className="text-xl">📅</span>
+                        <div className="w-11 h-11 rounded-lg bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center group-hover:bg-teal-100 dark:group-hover:bg-teal-900/50 transition-colors">
+                            <Calendar className="w-5 h-5 text-teal-600 dark:text-teal-400" />
                         </div>
                         <span className="text-sm text-slate-500 dark:text-slate-400">
                             {language === "ar" ? "الموعد القادم" : "Next Appointment"}
@@ -201,14 +222,14 @@ export default function HomePage({
 
                 {/* Treatment Progress */}
                 <motion.button
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.03, y: -2 }}
                     whileTap={{ scale: 0.98 }}
-                    className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 cursor-pointer hover:shadow-md transition-all text-right w-full"
+                    className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-md border border-slate-100 dark:border-slate-700 cursor-pointer hover:shadow-xl hover:border-emerald-200 dark:hover:border-emerald-700 transition-all text-right w-full group"
                     onClick={() => onNavigate?.("treatment-plans")}
                 >
                     <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
-                            <span className="text-xl">📊</span>
+                        <div className="w-11 h-11 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 transition-colors">
+                            <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <span className="text-sm text-slate-500 dark:text-slate-400">
                             {language === "ar" ? "تقدم العلاج" : "Treatment Progress"}
@@ -237,14 +258,14 @@ export default function HomePage({
 
                 {/* Balance */}
                 <motion.button
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.03, y: -2 }}
                     whileTap={{ scale: 0.98 }}
-                    className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 cursor-pointer hover:shadow-md transition-all text-right w-full"
+                    className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-md border border-slate-100 dark:border-slate-700 cursor-pointer hover:shadow-xl hover:border-amber-200 dark:hover:border-amber-700 transition-all text-right w-full group"
                     onClick={() => onNavigate?.("payment")}
                 >
                     <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-                            <span className="text-xl">💳</span>
+                        <div className="w-11 h-11 rounded-lg bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center group-hover:bg-amber-100 dark:group-hover:bg-amber-900/50 transition-colors">
+                            <CreditCard className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                         </div>
                         <span className="text-sm text-slate-500 dark:text-slate-400">
                             {language === "ar" ? "الرصيد المستحق" : "Balance Due"}
@@ -255,10 +276,10 @@ export default function HomePage({
                 </motion.button>
 
                 {/* Health Status */}
-                <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 text-right">
+                <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-md border border-slate-100 dark:border-slate-700 text-right hover:shadow-lg transition-all">
                     <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
-                            <span className="text-xl">😊</span>
+                        <div className="w-11 h-11 rounded-lg bg-green-50 dark:bg-green-900/30 flex items-center justify-center">
+                            <Activity className="w-5 h-5 text-green-600 dark:text-green-400" />
                         </div>
                         <span className="text-sm text-slate-500 dark:text-slate-400">
                             {language === "ar" ? "حالتك الصحية" : "Health Status"}
@@ -272,41 +293,45 @@ export default function HomePage({
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-md border border-slate-100 dark:border-slate-700">
                 <div className="flex items-center justify-between mb-6">
-                    <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                        <span className="flex h-2 w-2 rounded-full bg-teal-500" />
+                    <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2 text-lg">
+                        <div className="flex h-2 w-2 rounded-full bg-teal-500 animate-pulse" />
                         {language === "ar" ? "إجراءات سريعة" : "Quick Actions"}
                     </h3>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                    {quickActions.map((action, index) => (
-                        <button
-                            key={index}
-                            onClick={() => onNavigate?.(action.page)}
-                            className="group relative flex flex-col items-center p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all active:scale-95 border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
-                        >
-                            <div className={`w-12 h-12 ${action.color} rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-300 text-white`}>
-                                {action.icon}
-                            </div>
-                            <span className="mt-3 text-xs font-semibold text-slate-600 dark:text-slate-300 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
-                                {action.label}
-                            </span>
-                        </button>
-                    ))}
+                    {quickActions.map((action, index) => {
+                        const Icon = action.IconComponent;
+                        return (
+                            <button
+                                key={index}
+                                onClick={() => onNavigate?.(action.page)}
+                                className="group relative flex flex-col items-center p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all active:scale-95 border border-slate-100 dark:border-slate-700 hover:border-slate-200 dark:hover:border-slate-600 hover:shadow-md"
+                            >
+                                <div className={`w-12 h-12 ${action.color} rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:-translate-y-1 transition-all duration-300`}>
+                                    <Icon className="w-6 h-6 text-white" />
+                                </div>
+                                <span className="mt-3 text-xs font-semibold text-slate-600 dark:text-slate-300 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                                    {action.label}
+                                </span>
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
             {/* Treatment Timeline */}
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700"
+                className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-md border border-slate-100 dark:border-slate-700"
             >
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-                        {language === "ar" ? "📈 رحلة علاجك" : "📈 Your Treatment Journey"}
+                    <h3 className="text-base font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-teal-500" />
+                        {language === "ar" ? "رحلة علاجك" : "Your Treatment Journey"}
                     </h3>
                     <button
                         onClick={() => onNavigate?.("treatment-plans")}
@@ -342,20 +367,24 @@ export default function HomePage({
                 </div>
             </motion.div>
 
-            {/* Health Tip */}
-            <div className="bg-gradient-to-l from-cyan-50 to-teal-50 dark:from-cyan-950/30 dark:to-teal-950/30 rounded-xl p-5 border border-teal-200 dark:border-teal-800">
-                <div className="flex items-start gap-3">
-                    <span className="text-3xl">💡</span>
-                    <div>
-                        <h3 className="font-semibold text-teal-800 dark:text-teal-200 mb-2">
-                            {language === "ar" ? "نصيحة اليوم" : "Tip of the Day"}
+            {/* Health Tip - Professional Medical Advice */}
+            <div className="bg-gradient-to-br from-teal-50 via-cyan-50 to-teal-50 dark:from-teal-950/30 dark:via-cyan-950/30 dark:to-teal-950/30 rounded-xl p-5 border border-teal-100 dark:border-teal-800 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center flex-shrink-0 shadow-md">
+                        <Lightbulb className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="font-bold text-teal-900 dark:text-teal-100 mb-2 text-base flex items-center gap-2">
+                            {language === "ar" ? "نصيحة صحية" : "Health Tip"}
+                            <span className="text-xs font-normal text-teal-600 dark:text-teal-400 flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {language === "ar" ? "اليوم" : "Today"}
+                            </span>
                         </h3>
-                        <p className="text-sm text-teal-700 dark:text-teal-300">{dailyTip}</p>
+                        <p className="text-sm text-teal-800 dark:text-teal-200 leading-relaxed">{dailyTip}</p>
                     </div>
                 </div>
             </div>
-
-            {userType !== "patient" && <DashboardStats />}
         </motion.div>
     );
 }
